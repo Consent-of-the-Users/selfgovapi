@@ -72,7 +72,8 @@ def users_by_id(id):
         handle = get_attr_from_request_form(request, "handle")
         email = get_attr_from_request_form(request, "email")
         
-        if User.load_by_attr("handle", handle):
+        handle_taken = User.load_by_attr("handle", handle)
+        if handle_taken and not handle_taken.id == id:
             return {"message": "user handle taken."}, 400
         
         if User.load_by_attr("email", email):
