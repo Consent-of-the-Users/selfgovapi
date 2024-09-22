@@ -68,11 +68,21 @@ def users_by_id(id):
     
     if request.method == "PUT":
         name = get_attr_from_request_form(request, "name")
+        handle = request.form.get("handle")
+        email = request.form.get("email")
         
-        if User.load_by_attr("name", name):
-            return {"message": "user name taken."}, 400
+        if User.load_by_attr("handle", handle):
+            return {"message": "user handle taken."}, 400
+        
+        if User.load_by_attr("email", email):
+            return {"message": "user email taken."}, 400
 
-        user.name = name
+        if name:
+            user.name = name
+        if handle:
+            user.handle = handle
+        if email:
+            user.email = email
         user.save()
         
         return {"message": "user updated."}, 204
