@@ -6,9 +6,9 @@ from flask import request
 
 
 def has_valid_data(request):
-    user_name = request.form.get("name")
-    user_handle = request.form.get("handle")
-    user_email = request.form.get("email")
+    user_name = request.args.get("name")
+    user_handle = request.args.get("handle")
+    user_email = request.args.get("email")
 
     # name_taken = User.load_by_attr("name", user_name)
     handle_taken = User.load_by_attr("handle", user_handle)
@@ -37,9 +37,9 @@ def all_users():
         if not has_valid_data(request):
             return {"message": "Invalid data."}, 404
 
-        name = request.form.get("name")
-        handle = request.form.get("handle")
-        email = request.form.get("email")
+        name = request.args.get("name")
+        handle = request.args.get("handle")
+        email = request.args.get("email")
         data = {
             "name": name,
             "handle": handle,
