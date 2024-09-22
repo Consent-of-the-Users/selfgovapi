@@ -27,7 +27,11 @@ def get_attr_from_request_form(request, attr):
     """
     Get the attribute from the request. For testing purposes.
     """
-    return request.form.get(attr)
+    in_form = request.form.get(attr)
+    if in_form:
+        return in_form
+    in_arg = request.args.get(attr)
+    return in_arg
 
 
 @app.before_request

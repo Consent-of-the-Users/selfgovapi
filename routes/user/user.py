@@ -37,9 +37,10 @@ def all_users():
         if not has_valid_data(request):
             return {"message": "Invalid data."}, 404
 
-        name = request.form.get("name")
-        handle = request.form.get("handle")
-        email = request.form.get("email")
+        name = get_attr_from_request_form(request, "name")
+        handle = get_attr_from_request_form(request, "handle")
+        email = get_attr_from_request_form(request, "email")
+
         data = {
             "name": name,
             "handle": handle,
@@ -68,8 +69,8 @@ def users_by_id(id):
     
     if request.method == "PUT":
         name = get_attr_from_request_form(request, "name")
-        handle = request.form.get("handle")
-        email = request.form.get("email")
+        handle = get_attr_from_request_form(request, "handle")
+        email = get_attr_from_request_form(request, "email")
         
         if User.load_by_attr("handle", handle):
             return {"message": "user handle taken."}, 400
