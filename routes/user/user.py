@@ -76,7 +76,8 @@ def users_by_id(id):
         if handle_taken and not handle_taken.id == id:
             return {"message": "user handle taken."}, 400
         
-        if User.load_by_attr("email", email):
+        email_taken = User.load_by_attr("email", email)
+        if email_taken and not email_taken.id == id:
             return {"message": "user email taken."}, 400
 
         if name:
