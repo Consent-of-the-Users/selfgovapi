@@ -20,7 +20,11 @@ class User(BaseModel):
         
         if not kwargs.get("email"):
             return ValueError("User email is required")
+        
+        if not kwargs.get("id"):
+            return ValueError("User id is required")
 
+        self.id = kwargs.get("id")
         self.name = kwargs.get("name")
         self.handle = kwargs.get("handle")
         self.email = kwargs.get("email")
