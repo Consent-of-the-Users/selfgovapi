@@ -40,11 +40,13 @@ def all_users():
         name = get_attr_from_request_form(request, "name")
         handle = get_attr_from_request_form(request, "handle")
         email = get_attr_from_request_form(request, "email")
+        id = get_attr_from_request_form(request, "id")
 
         data = {
             "name": name,
             "handle": handle,
             "email": email,
+            "id": id
         }
         user_dict = create_user(**data)
         return {"message": "User created successfully.", "user": user_dict}, 201
