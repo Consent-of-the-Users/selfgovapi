@@ -31,7 +31,7 @@ from before_request import before_request
 from authorization import authorize_route
 
 
-@app.route("/status")
+@app.route("/status", strict_slashes=False)
 @authorize_route
 def status():
     return {"message": "OK"}, 200

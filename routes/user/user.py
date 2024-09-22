@@ -4,21 +4,21 @@ from authorization import authorize_route
 from before_request import get_attr_from_request_form
 from flask import request
 
-def client_id_same_as_authorized_client(client_id):
-    from authorization import authorize
-    client = authorize(request)
-    if client and client.id == client_id:
-        return True
-    return False
-
 
 def has_valid_data(request):
-    client_id = request.form.get("client_id")
-    if not client_id or not client_id_same_as_authorized_client(client_id):
-        return False
     user_name = request.form.get("name")
-    name_taken = User.load_by_attr("name", user_name)
-    if not user_name or name_taken:
+    user_handle = request.form.get("handle")
+    user_email = request.form.get("email")
+
+    # name_taken = User.load_by_attr("name", user_name)
+    handle_taken = User.load_by_attr("handle", user_handle)
+    email_taken = User.load_by_attr("email", user_email)
+
+    if not user_name:
+        return False
+    if not user_handle or handle_taken:
+        return False
+    if not user_email or email_taken:
         return False
     return True
 
@@ -37,11 +37,13 @@ def all_users():
         if not has_valid_data(request):
             return {"message": "Invalid data."}, 404
 
-        client_id = request.form.get("client_id")
         name = request.form.get("name")
+        handle = request.form.get("handle")
+        email = request.form.get("email")
         data = {
             "name": name,
-            "client_id": client_id
+            "handle": handle,
+            "email": email,
         }
         user_dict = create_user(**data)
         return {"message": "User created successfully.", "user": user_dict}, 201
