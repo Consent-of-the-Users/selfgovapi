@@ -42,9 +42,9 @@ class BaseModel(db.Model):
 
     __abstract__ = True
 
-    uid = db.Column(db.String(36), primary_key=True)
     created_at = db.Column(db.DateTime, nullable=False)
     updated_at = db.Column(db.DateTime, nullable=False)
+    uid = db.Column(db.String(36), primary_key=True, nullable=False)
 
     def __init__(self, **kwargs):
         from uuid import uuid4
@@ -53,7 +53,7 @@ class BaseModel(db.Model):
         for key, value in kwargs.items():
             setattr(self, key, value)
 
-        if "id" not in kwargs:
+        if "uid" not in kwargs:
             self.uid = str(uuid4())
 
         self.created_at = datetime.now()
@@ -100,11 +100,11 @@ class BaseModel(db.Model):
         ]
 
     @classmethod
-    def load_by_id(cls, id):
+    def load_by_id(cls, uid):
         """
-        Load an object by its id
+        Load an object by its uid
         """
-        return db.session.get(cls, id)
+        return db.session.get(cls, uid)
 
     @classmethod
     def load_by_attr(cls, attr, value):

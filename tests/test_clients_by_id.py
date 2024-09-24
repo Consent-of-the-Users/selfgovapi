@@ -7,7 +7,7 @@ from unittest.mock import MagicMock
 
 def test_client_by_id(method, is_valid_id, is_authorized, is_valid_put_data, make_request, mock_resource):
     """
-    Test the /clients/id endpoint with the following parameters:
+    Test the /clients/uid endpoint with the following parameters:
     - HTTP methods
     - Authorization header
     - Valid and invalid put data
