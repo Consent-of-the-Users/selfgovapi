@@ -11,12 +11,12 @@ def all_clients():
     return {"clients": clients}, 200
 
 
-@clients_v1.route("/<id>", methods=["GET", "PUT"], strict_slashes=False)
+@clients_v1.route("/<uid>", methods=["GET", "PUT"], strict_slashes=False)
 @authorize_route
-def client_by_id(id):
+def client_by_id(uid):
     from flask import request
 
-    client = Client.load_by_id(id)
+    client = Client.load_by_id(uid)
 
     if not client:
         return {"message": "Client not found."}, 404
@@ -37,9 +37,9 @@ def client_by_id(id):
 
     name_taken = Client.load_by_attr("name", name)
 
-    if name_taken and hasattr(name_taken, "id") and name_taken.id != id:
+    if name_taken and hasattr(name_taken, "uid") and name_taken.uid != uid:
         return {"message": "Client with this name already exists."}, 400
 
     client.name = name
-    client.save()
+    client.save(firestore=False)
     return {}, 204

@@ -166,17 +166,17 @@ def is_valid_id(request):
 
 
 
-def mock_class_and_object(class_path, id=None, to_dict_ret=None):
+def mock_class_and_object(class_path, uid=None, to_dict_ret=None):
     from unittest.mock import MagicMock
     from uuid import uuid4
     mock_class = mock_with_patch(class_path)
 
     # mock the object instance of that class
     mock_obj = MagicMock()
-    mock_obj.id = id if id else str(uuid4())
+    mock_obj.uid = uid if uid else str(uuid4())
 
     # mock the .to_dict() method so it can be serialized
-    to_dict = to_dict_ret if to_dict_ret else {"id": id}
+    to_dict = to_dict_ret if to_dict_ret else {"uid": uid}
     mock_obj.to_dict = MagicMock(return_value=to_dict)
     return mock_class, mock_obj
 
@@ -190,7 +190,7 @@ def mock_resource(method, is_valid_id, is_valid_put_data):
     def get_mock_resource(class_path, valid_id_return=False, valid_attr_return=False, invalid_id_return=False, invalid_attr_return=False, **to_dict_ret):
         '''
         class_path is used to patch in a class.
-        An instance of that class will be mocked, given an id = is_valid_id, and a .to_dict() method.
+        An instance of that class will be mocked, given a uid = is_valid_id, and a .to_dict() method.
         The class will have mock .load_by_id and .load_by_attr methods.
         -----------------------------------------------------------------------
         '''
@@ -199,10 +199,10 @@ def mock_resource(method, is_valid_id, is_valid_put_data):
 
         # mock the object instance of that class
         mock_obj = MagicMock()
-        mock_obj.id = is_valid_id
+        mock_obj.uid = is_valid_id
 
         # mock the .to_dict() method so it can be serialized
-        to_dict = to_dict_ret if to_dict_ret else {"id": is_valid_id}
+        to_dict = to_dict_ret if to_dict_ret else {"uid": is_valid_id}
         mock_obj.to_dict = MagicMock(return_value=to_dict)
 
         # if is_valid_id load methods return the instance/object, else None.
@@ -215,8 +215,8 @@ def mock_resource(method, is_valid_id, is_valid_put_data):
             mock_class.load_by_attr.return_value = valid_attr_return if valid_attr_return is not False else None
         elif not is_valid_put_data and "PUT" in method:
             # put data is invalid if it's taken by another instance of that resource, which would
-            # return an instance with a different id
-            mock_obj.id = str(uuid4())
+            # return an instance with a different uid
+            mock_obj.uid = str(uuid4())
             mock_class.load_by_attr.return_value = invalid_attr_return if invalid_attr_return is not False else mock_obj
         return mock_class, mock_obj
     

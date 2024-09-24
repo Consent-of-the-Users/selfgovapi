@@ -46,3 +46,13 @@ def mysql_connection(app):
         db.create_all()
 
     return db
+
+def firebase_connection():
+    import firebase_admin
+    from firebase_admin import credentials
+    from firebase_admin import firestore
+
+    cred = credentials.Certificate('/home/rmolimock/flask_api/selfgovapi/.firebase_key.json')
+    firebase = firebase_admin.initialize_app(cred)
+
+    return firestore.client()

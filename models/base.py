@@ -1,4 +1,38 @@
-from db import db
+from db import db, firebase_connection
+
+firestore = firebase_connection()
+
+
+def save_to_firestore(obj):
+    """
+    Save an object to Firestore
+    """
+    class_name = obj.__class__.__name__.lower()
+    if class_name == "user":
+        class_name = "users"
+    doc_ref = firestore.collection(class_name).document(obj.uid)
+    
+    # Get the document snapshot to check existence and print its data
+    doc_snapshot = doc_ref.get()
+    
+    if doc_snapshot.exists:
+        print("Document data:", doc_snapshot.to_dict())  # Print the document's current data
+        doc_ref.update(obj.to_dict())
+    else:
+        print("Document does not exist, creating new one.")
+        doc_ref.set(obj.to_dict())
+
+
+def delete_from_firestore(obj):
+    """
+    Delete an object from Firestore
+    """
+    class_name = obj.__class__.__name__.lower()
+    if class_name == "user":
+        class_name = "users"    
+    firestore.collection(class_name).document(obj.uid).delete()
+
+# TEST THESE WITH A SCRIPT
 
 
 class BaseModel(db.Model):
@@ -8,7 +42,7 @@ class BaseModel(db.Model):
 
     __abstract__ = True
 
-    id = db.Column(db.String(36), primary_key=True)
+    uid = db.Column(db.String(36), primary_key=True)
     created_at = db.Column(db.DateTime, nullable=False)
     updated_at = db.Column(db.DateTime, nullable=False)
 
@@ -20,17 +54,26 @@ class BaseModel(db.Model):
             setattr(self, key, value)
 
         if "id" not in kwargs:
-            self.id = str(uuid4())
+            self.uid = str(uuid4())
 
         self.created_at = datetime.now()
         self.updated_at = datetime.now()
 
-    def save(self):
+    def save(self, firestore=True):
         """
         Save to the database
         """
-        db.session.add(self)
-        db.session.commit()
+        try:
+            db.session.add(self)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            raise e
+        if firestore:
+            print('saving to firestore...')
+            save_to_firestore(self)
+
+        
 
     def delete(self):
         """

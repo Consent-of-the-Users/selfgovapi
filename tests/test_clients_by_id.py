@@ -49,13 +49,13 @@ def test_client_by_id(method, is_valid_id, is_authorized, is_valid_put_data, mak
         return
     
     if not is_valid_id:
-        # method allowed and request authorized but nothing found due to bad id
+        # method allowed and request authorized but nothing found due to bad uid
         assert response.status_code == 404
         return
     
     # TODO: In the future, ensure only the client being requested can perform the request.
-    # is_valid_id == client.id found via authorization token. This may involve adding another
-    # parameter to mock_resource. If token-found client.id is/isn't = is_valid_id.
+    # is_valid_id == client.uid found via authorization token. This may involve adding another
+    # parameter to mock_resource. If token-found client.uid is/isn't = is_valid_id.
 
     if method == "PUT":
         if not is_valid_put_data:
@@ -74,5 +74,5 @@ def test_client_by_id(method, is_valid_id, is_authorized, is_valid_put_data, mak
 
     # method allowed, request authorized, valid id, GET request
     assert response.status_code == 200
-    assert mock_obj.id == is_valid_id
+    assert mock_obj.uid == is_valid_id
     assert response.get_json().get("client") == mock_obj.to_dict()

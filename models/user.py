@@ -12,22 +12,28 @@ class User(BaseModel):
     email = db.Column(db.String(36), nullable=False)
 
     def __init__(self, **kwargs):
-        if not kwargs.get("name"):
+
+        name, handle = kwargs.get("name"), kwargs.get("handle")
+        email, uid = kwargs.get("email"), kwargs.get("uid")
+        print("IN INIT", name, handle, email, uid, "********************************")
+
+        if not name:
             raise ValueError("User name is required")
         
-        if not kwargs.get("handle"):
+        if not handle:
             raise ValueError("User handle is required")
         
-        if not kwargs.get("email"):
-            return ValueError("User email is required")
+        if not email:
+            raise ValueError("User email is required")
         
-        if not kwargs.get("id"):
-            return ValueError("User id is required")
+        if not uid:
+            raise ValueError("User uid is required")
 
-        self.id = kwargs.get("id")
+        self.uid = kwargs.get("uid")
         self.name = kwargs.get("name")
         self.handle = kwargs.get("handle")
         self.email = kwargs.get("email")
+
 
         super(User, self).__init__(**kwargs)
 

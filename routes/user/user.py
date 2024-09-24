@@ -9,11 +9,15 @@ def has_valid_data(request):
     user_name = request.form.get("name")
     user_handle = request.form.get("handle")
     user_email = request.form.get("email")
+    user_id = request.form.get("uid")
 
     # name_taken = User.load_by_attr("name", user_name)
     handle_taken = User.load_by_attr("handle", user_handle)
     email_taken = User.load_by_attr("email", user_email)
+    id_taken = User.load_by_id(user_id)
 
+    if not user_id or id_taken:
+        return False
     if not user_name:
         return False
     if not user_handle or handle_taken:
@@ -26,7 +30,7 @@ def has_valid_data(request):
 def create_user(**data):
     user = User(**data)
     user_dict = user.to_dict()
-    user.save()
+    user.save(firestore=False)
     return user_dict
 
 @users_v1.route("/", methods=["GET", "POST"], strict_slashes=False)
@@ -40,28 +44,32 @@ def all_users():
         name = get_attr_from_request_form(request, "name")
         handle = get_attr_from_request_form(request, "handle")
         email = get_attr_from_request_form(request, "email")
-        id = get_attr_from_request_form(request, "id")
+        uid = get_attr_from_request_form(request, "uid")
 
         data = {
             "name": name,
             "handle": handle,
             "email": email,
-            "id": id
+            "uid": uid
         }
-        user_dict = create_user(**data)
+        try:
+            user_dict = create_user(**data)
+        except Exception as e:
+            print(e)
+            return {"message": str(e)}, 500
         return {"message": "User created successfully.", "user": user_dict}, 201
 
     users = User.load_all_dict(remove_attr="client_id")
     return {"users": users}, 200
 
 
-@users_v1.route("/<id>", methods=["GET", "DELETE", "PUT"], strict_slashes=False)
+@users_v1.route("/<uid>", methods=["GET", "DELETE", "PUT"], strict_slashes=False)
 @authorize_route
-def users_by_id(id):
+def users_by_id(uid):
 
-    user = User.load_by_id(id)
+    user = User.load_by_id(uid)
     if not user:
-        return {"message": "Bad user id."}, 404
+        return {"message": "Bad user uid."}, 404
 
     user_dict = user.to_dict()
 
@@ -75,11 +83,11 @@ def users_by_id(id):
         email = get_attr_from_request_form(request, "email")
         
         handle_taken = User.load_by_attr("handle", handle)
-        if handle_taken and not handle_taken.id == id:
+        if handle_taken and not handle_taken.uid == uid:
             return {"message": "user handle taken."}, 400
         
         email_taken = User.load_by_attr("email", email)
-        if email_taken and not email_taken.id == id:
+        if email_taken and not email_taken.uid == uid:
             return {"message": "user email taken."}, 400
 
         if name:
