@@ -1,5 +1,6 @@
 from models.base import BaseModel, db
 from models.client import Client
+from models.many_to_many import users_conversations
 
 class User(BaseModel):
     """
@@ -10,6 +11,10 @@ class User(BaseModel):
     name = db.Column(db.String(36), nullable=False)
     handle = db.Column(db.String(36), nullable=False, unique=True)
     email = db.Column(db.String(36), nullable=False)
+
+    # Many-to-many relationship with conversations via the user_conversations table
+    conversations = db.relationship("Conversations", secondary=users_conversations, back_populates="participants")
+
 
     def __init__(self, **kwargs):
 
