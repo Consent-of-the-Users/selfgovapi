@@ -16,6 +16,27 @@ def are_valid_participants(user_ids):
 def conversation_by_user_ids():
 
     user_ids = request.args.get('users', '').split(',')
+
+    if request.method == 'POST':
+        import json
+        user_ids = request.form.get("users")
+        user_ids_cleaned = json.loads(user_ids)
+
+    if request.method == "GET":
+        # Join the list into a single string and then proceed to clean it
+        user_ids_cleaned = ','.join(user_ids).strip('[]').split(',')
+
+        # Remove the quotes from each user ID
+        user_ids_cleaned = [user_id.strip(' "') for user_id in user_ids_cleaned]
+
+    user_ids = user_ids_cleaned
+
+
+    if not user_ids:
+        user_ids = [uid for uid in request.args.get("users")]
+
+    print(request.method, user_ids, 'whole:list', [user for user in user_ids])
+
     if not user_ids:
         # retrieve them another way
         user_ids = request.args.getlist('users')
@@ -33,7 +54,7 @@ def conversation_by_user_ids():
         # Create a new conversation with the provided user IDs
 
         conversation = Conversations(participants=user_ids)
-        conversation.save(firestore=False)
+        conversation.save()
         return {"message": "Conversation created."}, 201
 
     
