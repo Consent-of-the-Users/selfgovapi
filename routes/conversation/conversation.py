@@ -27,11 +27,13 @@ def conversation_by_user_ids():
         # Join the list into a single string and then proceed to clean it
         user_ids_cleaned = ','.join(user_ids).strip('[]').split(',')
 
+        print("INITIAL USER IDS", user_ids_cleaned)
         # Remove the quotes from each user ID
         user_ids_cleaned = [user_id.strip(' "') for user_id in user_ids_cleaned]
 
     user_ids = user_ids_cleaned
-
+    myset = set(user_ids)
+    user_ids = list(myset)
 
     if not user_ids:
         user_ids = [uid for uid in request.args.get("users")]
@@ -66,12 +68,13 @@ def conversation_by_user_ids():
             if user not in conversation.participants:
                 conversation.participants.append(user)
         conversation.save()
-        return {"message": "Conversation created."}, 201
+        return {"message": "Conversation created.", "uid": conversation.uid}, 201
 
     
     conversation = Conversations.load_by_user_ids(user_ids)
+    print("GET: ****** ", conversation, user_ids)
     if not conversation:
         return {"message": "No conversation found."}, 404
     
 
-    return {"message": "OK"}, 200
+    return {"message": "OK", "uid": conversation.uid}, 200
