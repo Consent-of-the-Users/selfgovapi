@@ -56,7 +56,6 @@ def conversation_by_user_ids():
 
         try:
             conversation = Conversations()
-            conversation.save()
         except Exception as e:
             return {"message": f"Error creating conversation: {str(e)}"}, 500
 
@@ -66,6 +65,7 @@ def conversation_by_user_ids():
                 raise ValueError(f"User with ID {uid} not found")
             if user not in conversation.participants:
                 conversation.participants.append(user)
+        conversation.save()
         return {"message": "Conversation created."}, 201
 
     
