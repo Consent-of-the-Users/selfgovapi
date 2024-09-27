@@ -11,21 +11,8 @@ class Conversations(BaseModel):
     # Many-to-many relationship with users via the user_conversations table
     participants = db.relationship("User", secondary=users_conversations, back_populates="conversations")
 
-    def __init__(self, participants=None, **kwargs):
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
-
-        if participants is None or not isinstance(participants, list) or len(participants) < 2:
-            raise ValueError("A conversation requires at least two participants.")
-
-        self.participants = []
-
-        # Validate and append users
-        print(participants, "participants")
-        for uid in participants:
-            user = User.load_by_id(uid)
-            if not user:
-                raise ValueError(f"User with ID {uid} not found")
-            self.participants.append(user)
 
     @classmethod
     def load_by_user_ids(cls, user_ids):

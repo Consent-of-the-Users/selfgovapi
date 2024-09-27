@@ -14,6 +14,7 @@ def are_valid_participants(user_ids):
 @conversations_v1.route("/", methods=["GET", "POST"], strict_slashes=False)
 @authorize_route
 def conversation_by_user_ids():
+    from models import User
 
     user_ids = request.args.get('users', '').split(',')
 
@@ -53,8 +54,18 @@ def conversation_by_user_ids():
     if request.method == 'POST':
         # Create a new conversation with the provided user IDs
 
-        conversation = Conversations(participants=user_ids)
-        conversation.save()
+        try:
+            conversation = Conversations()
+            conversation.save()
+        except Exception as e:
+            return {"message": f"Error creating conversation: {str(e)}"}, 500
+
+        for uid in user_ids:
+            user = User.load_by_id(uid)
+            if not user:
+                raise ValueError(f"User with ID {uid} not found")
+            if user not in conversation.participants:
+                conversation.participants.append(user)
         return {"message": "Conversation created."}, 201
 
     
