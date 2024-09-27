@@ -25,17 +25,19 @@ class Conversations(BaseModel):
         :type user_ids: list
         :return: The conversation if found, else None.
         """
-        # Start the base query for conversations
-        print('in here')
-        query = db.session.query(cls).join(cls.participants).group_by(cls.uid)
-        print(query)
+        # Ensure we are working with a set of user_ids for comparison
+        user_ids_set = set(user_ids)
 
-        # Add a filter for each user_id to ensure the conversation includes them
-        for user_id in user_ids:
-            query = query.having(db.func.count(User.uid == user_id) > 0)
+        # Query all conversations and filter by participant user IDs
+        conversations = db.session.query(cls).join(cls.participants).group_by(cls.uid).having(
+            db.func.count(User.uid.distinct()) == len(user_ids_set)  # Ensures correct number of distinct users
+        ).all()
 
-        # Ensure the conversation contains exactly the same number of participants
-        query = query.having(db.func.count(User.uid) == len(user_ids))
+        # Filter out any conversations that don't match exactly all user_ids
+        for conversation in conversations:
+            conversation_user_ids = set([user.uid for user in conversation.participants])
+            if conversation_user_ids == user_ids_set:
+                return conversation
 
-        # Return the first matching conversation or None
-        return query.first()
+        return None
+
