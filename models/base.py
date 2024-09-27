@@ -14,13 +14,21 @@ def save_to_firestore(obj):
     
     # Get the document snapshot to check existence and print its data
     doc_snapshot = doc_ref.get()
-    
+
+    obj_dict = obj.to_dict()
+
+    if class_name == 'conversations':
+        x = obj.participants
+        print("participants:", x)
+        obj.user_ids = [user.uid for user in obj.participants]
+        obj_dict['participants'] = obj.user_ids
+
     if doc_snapshot.exists:
         print("Document data:", doc_snapshot.to_dict())  # Print the document's current data
-        doc_ref.update(obj.to_dict())
+        doc_ref.update(obj_dict)
     else:
         print("Document does not exist, creating new one.")
-        doc_ref.set(obj.to_dict())
+        doc_ref.set(obj_dict)
 
 
 def delete_from_firestore(obj):
