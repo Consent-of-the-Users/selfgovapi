@@ -1,6 +1,6 @@
 import pytest
 from authorization import unauthorized_message
-from conftest import normalized_put_method_name, mock_class_and_object, mock_with_patch
+from conftest import normalized_put_method_name, mock_with_patch
 
 def test_all_users(method, is_authorized, is_valid_post_data, make_request):
     """

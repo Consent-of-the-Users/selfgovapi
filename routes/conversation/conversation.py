@@ -38,8 +38,6 @@ def conversation_by_user_ids():
     if not user_ids:
         user_ids = [uid for uid in request.args.get("users")]
 
-    print(request.method, user_ids, 'whole:list', [user for user in user_ids])
-
     if not user_ids:
         # retrieve them another way
         user_ids = request.args.getlist('users')
@@ -72,7 +70,6 @@ def conversation_by_user_ids():
 
     
     conversation = Conversations.load_by_user_ids(user_ids)
-    print("GET: ****** ", conversation, user_ids)
     if not conversation:
         return {"message": "No conversation found."}, 404
     
