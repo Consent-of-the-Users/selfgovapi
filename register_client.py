@@ -22,7 +22,7 @@ def create_client(name):
             return "Client name already in use.\n"
 
         client = Client(**{"name": name})
-        client.save()
+        client.save(firestore=False)
 
         return client.token
 
