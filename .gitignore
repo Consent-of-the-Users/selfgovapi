@@ -3,6 +3,11 @@
 config.ini
 *.config
 *.ini
+.migrations/*
+.migrations
+..gitignore
+*migrations*
+register_client.py
 
 # inmfrastructure as code
 app.yaml
