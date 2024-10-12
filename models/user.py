@@ -1,5 +1,4 @@
 from models.base import BaseModel, db
-from models.client import Client
 from models.many_to_many import users_conversations
 
 class User(BaseModel):
