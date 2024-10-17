@@ -75,3 +75,25 @@ def conversation_by_user_ids():
     
 
     return {"message": "OK", "uid": conversation.uid}, 200
+
+
+@conversations_v1.route("<convo_id>/participants/<user_id>", methods=["DELETE"], strict_slashes=False)
+@authorize_route
+def remove_participant(convo_id, user_id):
+    from models.conversation import Conversations
+    from models.user import User
+
+    conversation = Conversations.load_by_id(convo_id)
+    if not conversation:
+        return {"message": "No conversation found."}, 404
+
+    user = User.load_by_id(user_id)
+    if not user:
+        return {"message": "User not found."}, 404
+
+    if user in conversation.participants:
+        conversation.participants.remove(user)
+        conversation.save()
+        return {"message": "Participant removed."}, 200
+    else:
+        return {"message": "Participant not found in the conversation."}, 404
