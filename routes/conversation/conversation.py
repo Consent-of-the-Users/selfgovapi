@@ -17,6 +17,7 @@ def conversation_by_user_ids():
     from models import User
 
     user_ids = request.args.get('users', '').split(',')
+    is_group = request.args.get('is_group', False)
 
     if request.method == 'POST':
         import json
@@ -55,7 +56,10 @@ def conversation_by_user_ids():
         # Create a new conversation with the provided user IDs
 
         try:
-            conversation = Conversations()
+            data = {
+                'is_group': is_group
+            }
+            conversation = Conversations(**data)
         except Exception as e:
             return {"message": f"Error creating conversation: {str(e)}"}, 500
 
@@ -69,7 +73,7 @@ def conversation_by_user_ids():
         return {"message": "Conversation created.", "uid": conversation.uid}, 201
 
     
-    conversation = Conversations.load_by_user_ids(user_ids)
+    conversation = Conversations.load_by_user_ids_and_is_group(user_ids, is_group)
     if not conversation:
         return {"message": "No conversation found."}, 404
     
