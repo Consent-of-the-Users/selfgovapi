@@ -18,6 +18,10 @@ def conversation_by_user_ids():
 
     user_ids = request.args.get('users', '').split(',')
     is_group = request.args.get('is_group', False)
+    if is_group:
+        is_group = True
+    else:
+        is_group = False
 
     if request.method == 'POST':
         import json
