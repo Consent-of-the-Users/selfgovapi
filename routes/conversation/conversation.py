@@ -37,8 +37,10 @@ def conversation_by_user_ids():
     myset = set(user_ids)
     user_ids = list(myset)
 
-    if is_group:
+    if is_group == "true" or is_group == "True":
         is_group = True
+    elif is_group == "false" or is_group == "False":
+        is_group = False
     else:
         is_group = False
 
