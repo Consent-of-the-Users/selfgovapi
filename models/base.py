@@ -83,12 +83,19 @@ class BaseModel(db.Model):
 
         
 
-    def delete(self):
+    def delete(self, firestore=True):
         """
         Delete from the database
         """
-        db.session.delete(self)
-        db.session.commit()
+        try:
+            db.session.delete(self)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            raise e
+        if firestore:
+            print('deleting from firestore...')
+            delete_from_firestore(self)
 
     @classmethod
     def load_all(cls):
