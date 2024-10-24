@@ -106,6 +106,8 @@ def remove_participant(convo_id, user_id):
     if user in conversation.participants:
         conversation.participants.remove(user)
         conversation.save()
+        if len(conversation.participants) == 0:
+            conversation.delete()
         return {"message": "Participant removed."}, 200
     else:
         return {"message": "Participant not found in the conversation."}, 404
