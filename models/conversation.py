@@ -12,10 +12,13 @@ class Conversations(BaseModel):
     participants = db.relationship("User", secondary=users_conversations, back_populates="conversations")
     # bolean for is_group
     is_group = db.Column(db.Boolean, default=False)
+    title = db.Column(db.String(255), nullable=True)
 
     def __init__(self, **kwargs):
         is_group = kwargs.get('is_group')
+        title = kwargs.get('title')
         self.is_group = is_group
+        self.title = title
         super().__init__(**kwargs)
 
     @classmethod

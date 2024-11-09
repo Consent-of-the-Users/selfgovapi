@@ -18,12 +18,14 @@ def conversation_by_user_ids():
 
     user_ids = request.args.get('users', '').split(',')
     is_group = request.args.get('is_group', False)
+    title = request.args.get('title', '')
 
     if request.method == 'POST':
         import json
         user_ids = request.form.get("users")
         user_ids_cleaned = json.loads(user_ids)
         is_group = request.form.get("is_group")
+        title = request.form.get("title")
 
     if request.method == "GET":
         # Join the list into a single string and then proceed to clean it
@@ -65,7 +67,8 @@ def conversation_by_user_ids():
 
         try:
             data = {
-                'is_group': is_group
+                'is_group': is_group,
+                'title': title
             }
             conversation = Conversations(**data)
         except Exception as e:
