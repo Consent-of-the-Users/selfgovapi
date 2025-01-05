@@ -12,14 +12,13 @@ class User(BaseModel):
     email = db.Column(db.String(36), nullable=False)
 
     # Many-to-many relationship with conversations via the user_conversations table
-    conversations = db.relationship("Conversations", secondary=users_conversations, back_populates="participants")
+    conversations = db.relationship("Conversation", secondary=users_conversations, back_populates="participants")
 
 
     def __init__(self, **kwargs):
 
         name, handle = kwargs.get("name"), kwargs.get("handle")
         email, uid = kwargs.get("email"), kwargs.get("uid")
-        print("IN INIT", name, handle, email, uid, "********************************")
 
         if not name:
             raise ValueError("User name is required")

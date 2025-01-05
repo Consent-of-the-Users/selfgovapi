@@ -142,7 +142,6 @@ def is_valid_put_data(request, method):
     Parameterizes whether or not the data for PUT requests is valid. Informed
     by teh method parameter.
     """
-    print(f"is_valid_put_data is {method == 'PUT-VALID'}")
     return {"data": "valid put data"} if method == "PUT-VALID" else {}
 
 @pytest.fixture()
@@ -151,7 +150,6 @@ def is_valid_post_data(request, method):
     Parameterizes whether or not the data for PUT requests is valid. Informed
     by teh method parameter.
     """
-    print(f"is_valid_post_data is {method == 'POST-VALID'}")
     return {"data": "valid post data"} if method == "POST-VALID" else {}
 
 

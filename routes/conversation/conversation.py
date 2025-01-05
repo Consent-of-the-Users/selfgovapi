@@ -1,7 +1,7 @@
 from routes.conversation import conversations_v1
 from authorization import authorize_route
 from flask import request
-from models.conversation import Conversations
+from models.conversation import Conversation
 
 def are_valid_participants(user_ids):
     from models.user import User
@@ -31,7 +31,6 @@ def conversation_by_user_ids():
         # Join the list into a single string and then proceed to clean it
         user_ids_cleaned = ','.join(user_ids).strip('[]').split(',')
 
-        print("INITIAL USER IDS", user_ids_cleaned)
         # Remove the quotes from each user ID
         user_ids_cleaned = [user_id.strip(' "') for user_id in user_ids_cleaned]
 
@@ -70,7 +69,7 @@ def conversation_by_user_ids():
                 'is_group': is_group,
                 'title': title
             }
-            conversation = Conversations(**data)
+            conversation = Conversation(**data)
         except Exception as e:
             return {"message": f"Error creating conversation: {str(e)}"}, 500
 
@@ -84,7 +83,7 @@ def conversation_by_user_ids():
         return {"message": "Conversation created.", "uid": conversation.uid}, 201
 
     
-    conversation = Conversations.load_by_user_ids_and_is_group(user_ids, is_group)
+    conversation = Conversation.load_by_user_ids_and_is_group(user_ids, is_group)
     if not conversation:
         return {"message": "No conversation found."}, 404
     
@@ -95,10 +94,10 @@ def conversation_by_user_ids():
 @conversations_v1.route("<convo_id>/participants/<user_id>", methods=["DELETE"], strict_slashes=False)
 @authorize_route
 def remove_participant(convo_id, user_id):
-    from models.conversation import Conversations
+    from models.conversation import Conversation
     from models.user import User
 
-    conversation = Conversations.load_by_id(convo_id)
+    conversation = Conversation.load_by_id(convo_id)
     if not conversation:
         return {"message": "No conversation found."}, 404
 

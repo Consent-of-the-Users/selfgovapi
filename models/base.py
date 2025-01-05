@@ -19,15 +19,12 @@ def save_to_firestore(obj):
 
     if class_name == 'conversations':
         x = obj.participants
-        print("participants:", x)
         obj.user_ids = [user.uid for user in obj.participants]
         obj_dict['participants'] = obj.user_ids
 
     if doc_snapshot.exists:
-        print("Document data:", doc_snapshot.to_dict())  # Print the document's current data
         doc_ref.update(obj_dict)
     else:
-        print("Document does not exist, creating new one.")
         doc_ref.set(obj_dict)
 
 
@@ -78,7 +75,6 @@ class BaseModel(db.Model):
             db.session.rollback()
             raise e
         if firestore:
-            print('saving to firestore...')
             save_to_firestore(self)
 
         
@@ -94,7 +90,6 @@ class BaseModel(db.Model):
             db.session.rollback()
             raise e
         if firestore:
-            print('deleting from firestore...')
             delete_from_firestore(self)
 
     @classmethod

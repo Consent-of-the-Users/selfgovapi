@@ -2,7 +2,7 @@ from models.base import BaseModel, db
 from models.many_to_many import users_conversations
 from models.user import User
 
-class Conversations(BaseModel):
+class Conversation(BaseModel):
     """
     Represents a conversation between two or more users and/or groups.
     """
