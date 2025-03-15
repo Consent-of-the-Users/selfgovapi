@@ -2,13 +2,22 @@ from app import create_app, register_blueprints
 from db import mysql_connection
 from flask_cors import CORS
 from flask_migrate import Migrate
+from dotenv import load_dotenv
+from os import getenv
+
+
+# load .env variables into the environment
+load_dotenv()
+
+# env variable determines if running in production
+PRODUCTION = getenv('PRODUCTION')
 
 # Initialize the flask app
 app = create_app()
 
-# Enable CORS for all domains
-# CHANGE THIS IN PRODUCTION
-CORS(app, resources={r"/*": {"origins": "*"}})
+if not PRODUCTION:
+    # Enable CORS for all domains
+    CORS(app, resources={r"/*": {"origins": "*"}})
 
 # import all models so that they are registered with the db
 from models import *
@@ -26,7 +35,6 @@ register_blueprints(app)
 from before_request import before_request
 
 # from after_requests import after_request
-
 
 from authorization import authorize_route
 

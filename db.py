@@ -6,10 +6,10 @@ from os import getenv
 # initialize the db object
 db = SQLAlchemy()
 
-# load the environment variables
+# load .env variables into the environment
 load_dotenv()
 
-# get database credentials from the environment variables
+# get database credentials from environment variables
 db_name = getenv("DB_NAME")
 db_user = getenv("DB_USER")
 db_password = getenv("DB_PASSWORD")

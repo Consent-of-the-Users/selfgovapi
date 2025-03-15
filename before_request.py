@@ -23,15 +23,14 @@ def set_request_client(client):
     return
 
 
-def get_attr_from_request_form(request, attr):
+def request_attr(attr):
     """
     Get the attribute from the request. For testing purposes.
     """
+    from flask import request
     in_form = request.form.get(attr)
-    if in_form:
-        return in_form
-    in_arg = request.args.get(attr)
-    return in_arg
+
+    return in_form if in_form else request.args.get(attr)
 
 
 @app.before_request
@@ -41,9 +40,6 @@ def before_request():
     token = get_authorization_token(request)
 
     set_request_token(token)
-
-    if not token:
-        return
 
     client = Client.load_by_attr("token", token)
 

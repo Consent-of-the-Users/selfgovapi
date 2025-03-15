@@ -5,6 +5,8 @@ from functools import wraps
 
 unauthorized_message = {"message": "Unauthorized\n"}, 401
 
+def error_message(msg, status_code=400):
+    return {"message": msg}, status_code
 
 def get_authorization_token(request):
     """
@@ -20,11 +22,13 @@ def get_authorization_token(request):
 def get_client_from_token(token):
     """
     Returns client based on given token if valid, else None.
-    This extra function wrapping around load_by_attr is needed for mocking in tests."""
-    client = Client.load_by_attr("token", token)
-    return client
+    This otherwise redundant function wrapping around load_by_attr is needed for
+    mocking in tests, in a way that is more descriptive within that domain.
+    """
+    return Client.load_by_attr("token", token)
 
-def authorize(request):
+
+def authorized_request(request):
     token = get_authorization_token(request)
     return get_client_from_token(token)
     
@@ -33,7 +37,7 @@ def authorize(request):
 def authorize_route(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
-        if not authorize(request):
+        if not authorized_request(request):
             return unauthorized_message
 
         return func(*args, **kwargs)
