@@ -2,39 +2,58 @@ from db import db, firebase_connection
 
 firestore = firebase_connection()
 
+def serialize_obj_lists_for_firestore(obj):
+    """
+    ORM objects need a Firestore-friendly dictionary with lists of UIDs.
+    """
+    obj_dict = obj.to_dict()
+    
+    # ignore private attributes
+    for attr_name in dir(obj):
+        if attr_name.startswith("_"):
+            continue
+
+        attr_value = getattr(obj, attr_name, None)
+
+        # if it's a list of objects with UIDs, replace with a list of UIDs
+        if isinstance(attr_value, list) and attr_value and hasattr(attr_value[0], "uid"):
+            obj_dict[attr_name] = [item.uid for item in attr_value]  # Convert to list of UIDs
+    
+    return obj_dict
+
 
 def save_to_firestore(obj):
     """
     Save an object to Firestore
     """
+    # normalize class names to firestore's standard
     class_name = obj.__class__.__name__.lower()
-    if class_name == "user":
-        class_name = "users"
+
+    # associate class name with the firestore collection
     doc_ref = firestore.collection(class_name).document(obj.uid)
     
     # Get the document snapshot to check existence and print its data
     doc_snapshot = doc_ref.get()
 
-    obj_dict = obj.to_dict()
+    # firestore is nosql, so it needs a dedicated list of ID strings for quick reads related to membership
+    obj_dict = serialize_obj_lists_for_firestore(obj)
 
-    if class_name == 'conversations':
-        x = obj.participants
-        obj.user_ids = [user.uid for user in obj.participants]
-        obj_dict['participants'] = obj.user_ids
-
-    if doc_snapshot.exists:
-        doc_ref.update(obj_dict)
-    else:
+    # Create the document or update it if it already exists.
+    if not doc_snapshot.exists:
         doc_ref.set(obj_dict)
+    else:
+        doc_ref.update(obj_dict)
 
 
 def delete_from_firestore(obj):
     """
     Delete an object from Firestore
     """
+
+    # normalize class names
     class_name = obj.__class__.__name__.lower()
-    if class_name == "user":
-        class_name = "users"    
+
+    # delete document by uid
     firestore.collection(class_name).document(obj.uid).delete()
 
 # TEST THESE WITH A SCRIPT
@@ -68,16 +87,19 @@ class BaseModel(db.Model):
         """
         Save to the database
         """
+        from datetime import datetime
+
+        old_updated_at = self.updated_at
         try:
+            self.updated_at = datetime.now()
             db.session.add(self)
             db.session.commit()
         except Exception as e:
+            self.updated_at = old_updated_at
             db.session.rollback()
             raise e
         if firestore:
             save_to_firestore(self)
-
-        
 
     def delete(self, firestore=True):
         """
@@ -110,7 +132,7 @@ class BaseModel(db.Model):
         ]
 
     @classmethod
-    def load_by_id(cls, uid):
+    def load_by_uid(cls, uid):
         """
         Load an object by its uid
         """

@@ -1,5 +1,5 @@
 from models.base import BaseModel, db
-from models.many_to_many import users_conversations
+from models.many_to_many import users_convos, users_groops
 
 class User(BaseModel):
     """
@@ -11,8 +11,13 @@ class User(BaseModel):
     handle = db.Column(db.String(36), nullable=False, unique=True)
     email = db.Column(db.String(36), nullable=False)
 
-    # Many-to-many relationship with conversations via the user_conversations table
-    conversations = db.relationship("Conversation", secondary=users_conversations, back_populates="participants")
+    # TODO: reevaluate convos into groups
+
+    # Many-to-many relationship with convos via the user_convos table
+    convos = db.relationship("Convo", secondary=users_convos, back_populates="participants")
+    
+    # Many-to-many relationship with groops via the user_groops table
+    groops = db.relationship("Groop", secondary=users_groops, back_populates="members")
 
 
     def __init__(self, **kwargs):

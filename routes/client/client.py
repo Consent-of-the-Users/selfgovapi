@@ -1,5 +1,5 @@
 from models import Client
-from before_request import get_attr_from_request_form
+from before_request import request_attr
 from routes.client import clients_v1
 from authorization import authorize_route
 
@@ -16,7 +16,7 @@ def all_clients():
 def client_by_id(uid):
     from flask import request
 
-    client = Client.load_by_id(uid)
+    client = Client.load_by_uid(uid)
 
     if not client:
         return {"message": "Client not found."}, 404
@@ -24,20 +24,21 @@ def client_by_id(uid):
     elif request.method == "GET":
         return {"client": client.to_dict()}, 200
 
+    # DELETE is disabled until I have need for dynamic client management
     elif request.method == "DELETE":
         client.delete()
         return {}, 204
 
     # method == PUT
 
-    name = get_attr_from_request_form(request, "name")
+    name = request_attr(request, "name")
 
     if not name:
         return {"message": "Name is required"}, 400
 
     name_taken = Client.load_by_attr("name", name)
 
-    if name_taken and hasattr(name_taken, "uid") and name_taken.uid != uid:
+    if name_taken and ((hasattr(name_taken, "uid") and name_taken.uid != uid) or not hasattr(name_taken, "uid")):
         return {"message": "Client with this name already exists."}, 400
 
     client.name = name

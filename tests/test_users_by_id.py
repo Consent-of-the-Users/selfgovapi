@@ -14,14 +14,14 @@ def test_user_by_id(method, is_valid_id, is_authorized, is_valid_put_data, make_
 
     user_id = is_valid_id if is_valid_id else str(uuid4())
 
-    get_attr_from_request_form = mock_with_patch("routes.user.user.get_attr_from_request_form")
-    get_attr_from_request_form.return_value = False
+    request_attr = mock_with_patch("routes.user.user.request_attr")
+    request_attr.return_value = False
     if method == "PUT" and is_valid_id and is_authorized and is_valid_put_data:
-        get_attr_from_request_form.return_value = True 
+        request_attr.return_value = True 
 
     # ACTION ==================================================================
 
-    response = make_request(method, f"/v1/users/{user_id}/", authorization=is_authorized)
+    response = make_request(method, f"/v1/users/{user_id}/", authorization=is_authorized, data=is_valid_put_data)
 
     # ASSERTIONS ==============================================================
 

@@ -163,21 +163,6 @@ def is_valid_id(request):
     return str(uuid4()) if request.param else None
 
 
-
-def mock_class_and_object(class_path, uid=None, to_dict_ret=None):
-    from unittest.mock import MagicMock
-    from uuid import uuid4
-    mock_class = mock_with_patch(class_path)
-
-    # mock the object instance of that class
-    mock_obj = MagicMock()
-    mock_obj.uid = uid if uid else str(uuid4())
-
-    # mock the .to_dict() method so it can be serialized
-    to_dict = to_dict_ret if to_dict_ret else {"uid": uid}
-    mock_obj.to_dict = MagicMock(return_value=to_dict)
-    return mock_class, mock_obj
-
 @pytest.fixture
 def mock_resource(method, is_valid_id, is_valid_put_data):
     from unittest.mock import MagicMock
@@ -189,13 +174,11 @@ def mock_resource(method, is_valid_id, is_valid_put_data):
         '''
         class_path is used to patch in a class.
         An instance of that class will be mocked, given a uid = is_valid_id, and a .to_dict() method.
-        The class will have mock .load_by_id and .load_by_attr methods.
+        The class will have mock .load_by_uid and .load_by_attr methods.
         -----------------------------------------------------------------------
         '''
-        # patch the class     
-        mock_class = mock_with_patch(class_path)
-
-        # mock the object instance of that class
+        # MOCK INSTANCE =======================================================
+        
         mock_obj = MagicMock()
         mock_obj.uid = is_valid_id
 
@@ -203,11 +186,16 @@ def mock_resource(method, is_valid_id, is_valid_put_data):
         to_dict = to_dict_ret if to_dict_ret else {"uid": is_valid_id}
         mock_obj.to_dict = MagicMock(return_value=to_dict)
 
+        # MOCK CLASS ==========================================================
+
+        mock_class = mock_with_patch(class_path)
+
         # if is_valid_id load methods return the instance/object, else None.
+        # checking if valid/invalid_id_return allows you to override the specific return value if you want to.
         if is_valid_id:
-            mock_class.load_by_id.return_value = valid_id_return if valid_id_return is not False else mock_obj
+            mock_class.load_by_uid.return_value = valid_id_return if valid_id_return is not False else mock_obj
         else:
-            mock_class.load_by_id.return_value = invalid_id_return if invalid_id_return is not False else None
+            mock_class.load_by_uid.return_value = invalid_id_return if invalid_id_return is not False else None
 
         if is_valid_put_data and "PUT" in method:
             mock_class.load_by_attr.return_value = valid_attr_return if valid_attr_return is not False else None
@@ -216,6 +204,7 @@ def mock_resource(method, is_valid_id, is_valid_put_data):
             # return an instance with a different uid
             mock_obj.uid = str(uuid4())
             mock_class.load_by_attr.return_value = invalid_attr_return if invalid_attr_return is not False else mock_obj
+
         return mock_class, mock_obj
     
     return get_mock_resource

@@ -1,29 +1,22 @@
 from models import User
 from routes.user import users_v1
 from authorization import authorize_route
-from before_request import get_attr_from_request_form
+from before_request import request_attr
 from flask import request
 
 
-def has_valid_data(request):
-    user_name = request.form.get("name")
-    user_handle = request.form.get("handle")
-    user_email = request.form.get("email")
-    user_id = request.form.get("uid")
+def has_valid_data(name, handle, email, uid):
 
-    # name_taken = User.load_by_attr("name", user_name)
-    handle_taken = User.load_by_attr("handle", user_handle)
-    email_taken = User.load_by_attr("email", user_email)
-    id_taken = User.load_by_id(user_id)
+    if not (name and handle and email and uid):
+        return False
 
-    if not user_id or id_taken:
+    handle_taken = User.load_by_attr("handle", handle)
+    email_taken = User.load_by_attr("email", email)
+    id_taken = User.load_by_uid(uid)
+    
+    if handle_taken or email_taken or id_taken:
         return False
-    if not user_name:
-        return False
-    if not user_handle or handle_taken:
-        return False
-    if not user_email or email_taken:
-        return False
+    
     return True
 
 
@@ -33,18 +26,18 @@ def create_user(**data):
     user.save(firestore=False)
     return user_dict
 
+
 @users_v1.route("/", methods=["GET", "POST"], strict_slashes=False)
 @authorize_route
 def all_users():
 
     if request.method == "POST":
-        if not has_valid_data(request):
-            return {"message": "Invalid data."}, 404
+        
+        name, handle = request_attr("name"), request_attr("handle")
+        email, uid = request_attr("email"), request_attr("uid")
 
-        name = get_attr_from_request_form(request, "name")
-        handle = get_attr_from_request_form(request, "handle")
-        email = get_attr_from_request_form(request, "email")
-        uid = get_attr_from_request_form(request, "uid")
+        if not has_valid_data(name, handle, email, uid):
+            return {"message": "Invalid data."}, 404
 
         data = {
             "name": name,
@@ -67,20 +60,18 @@ def all_users():
 @authorize_route
 def users_by_id(uid):
 
-    user = User.load_by_id(uid)
+    user = User.load_by_uid(uid)
     if not user:
         return {"message": "Bad user uid."}, 404
-
-    user_dict = user.to_dict()
 
     if request.method == "DELETE":
         user.delete()
         return {"message": "User deleted."}, 204
     
     if request.method == "PUT":
-        name = get_attr_from_request_form(request, "name")
-        handle = get_attr_from_request_form(request, "handle")
-        email = get_attr_from_request_form(request, "email")
+        name = request_attr(request, "name")
+        handle = request_attr(request, "handle")
+        email = request_attr(request, "email")
         
         handle_taken = User.load_by_attr("handle", handle)
         if handle_taken and not handle_taken.uid == uid:
@@ -100,5 +91,8 @@ def users_by_id(uid):
         
         return {"message": "user updated."}, 204
 
+    # METHOD IS GET ===========================================================
+
+    user_dict = user.to_dict()
     
     return {"message": "OK", "user": user_dict}, 200
