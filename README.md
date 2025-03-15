@@ -1,3 +1,4 @@
+©Copyright 2022 Russell Molimock
 # Flask API Boilerplate
 This is a boilerplate repo for a Flask API. I'm creating it to help me get started with new projects faster.
 
