@@ -40,7 +40,7 @@ def test_all_convos(method, is_authorized, is_valid_post_data, make_request):
     
     if method == "POST":
         if not is_valid_post_data:
-            assert response.status_code == 404
+            assert response.status_code == 400
             return
         else:
             assert response.status_code == 201

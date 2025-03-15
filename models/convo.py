@@ -20,7 +20,7 @@ class Convo(BaseModel):
     def __init__(self, **kwargs):
         self.latest_msg = None
         self.latest_msg_uid = None
-        self.title = None
+        self.title = ''
         self.groop_uid = None
         self.groop = None
         super(Convo, self).__init__(**kwargs)
@@ -36,6 +36,35 @@ class Convo(BaseModel):
         self._latest_msg = msg
         #self._latest_msg_uid = msg.uid
         self._latest_msg_uid = 0
+
+    @classmethod
+    def load_by_participants(cls, participants):
+        """
+        Load a convo by participants.
+
+        :param participants: List of User objects to match in the convo.
+        :type participants: list
+        :return: The convo if found, else None.
+        """
+        # Ensure we are working with a set of user_ids for comparison
+        participants_set = set(participants)
+
+        # Query convos that have the correct number of participants
+        convos = (
+            db.session.query(cls)
+            .join(cls.participants)
+            .group_by(cls.uid)
+            .having(db.func.count(User.uid.distinct()) == len(participants_set))  # Ensures correct number of distinct users
+            .all()
+        )
+
+        # Filter out any convos that don't match exactly all user_ids
+        for convo in convos:
+            convo_participants = set(convo.participants)
+            if convo_participants == participants_set:
+                return convo
+
+        return
     
     def add_participant(self, participant):
         """There must be exactly two Convo participants."""

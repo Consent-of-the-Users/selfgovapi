@@ -149,6 +149,13 @@ class BaseModel(db.Model):
         """
         Serialize the object
         """
+        '''
         return {
             column.name: getattr(self, column.name) for column in self.__table__.columns
+        }'
+        '''
+        return {
+            column.name: getattr(self, column.name)
+            for column in self.__table__.columns
+            if hasattr(self, column.name)
         }

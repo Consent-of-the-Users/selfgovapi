@@ -6,6 +6,7 @@ from flask import request
 def has_valid_data(user_uids):
     import json
     from models.user import User
+    from models.convo import Convo
 
     if not user_uids:
         return False
@@ -17,9 +18,16 @@ def has_valid_data(user_uids):
     if len(user_uids) != 2:
         return False
     
+    participants = []
+    
     for uid in user_uids:
-        if not User.load_by_uid(uid):
+        user_exists = User.load_by_uid(uid)
+        if not user_exists:
             return False
+        participants.append(user_exists)
+
+    if Convo.load_by_participants(participants):
+        return False
 
     return user_uids
 
@@ -41,8 +49,11 @@ def create_convo(user_uids):
             raise ValueError(f"User with ID {uid} not found.")
         
         convo.add_participant(participant)
+
+    convo_dict = convo.to_dict()
+    convo.save()
     
-    return convo
+    return convo_dict
 
 
 @convos_v1.route('/', methods=['POST'], strict_slashes=False)
@@ -56,14 +67,44 @@ def all_convos():
         return error_message("Invalid data.")
     
     try:
-        convo = create_convo(user_uids=user_ids)
+        convo_dict = create_convo(user_uids=user_ids)
     except Exception as e:
         return error_message(f"Error creating convo: {str(e)}")    
-    
-    convo_dict = convo.to_dict()
-    convo.save()
     return {"message": "Convo created.", "convo": convo_dict}, 201
 
+
+
+def has_valid_participants(participant_one, participant_two):
+    from models.user import User
+    from models.convo import Convo
+
+    if not (participant_one and participant_two):
+        return False
+
+    user_one = User.load_by_uid(participant_one)
+    user_two = User.load_by_uid(participant_two)
+
+    if not user_one or not user_two:
+        return False
+
+    participants = [user_one, user_two]
+
+    convo = Convo.load_by_participants(participants)
+    if not convo:
+        return False
+    
+    return convo.to_dict()
+
+
+@convos_v1.route('/<participant_one>/<participant_two>', methods=['GET'], strict_slashes=False)
+@authorize_route
+def get_convo_by_participants(participant_one, participant_two):
+
+    convo = has_valid_participants(participant_one, participant_two)
+    if not convo:
+        return error_message("Invalid data.", 404)
+    
+    return {"message": "OK", "convo": convo}, 200
 
 
 """
