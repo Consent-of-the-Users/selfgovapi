@@ -79,18 +79,21 @@ def has_valid_participants(participant_one, participant_two):
     from models.convo import Convo
 
     if not (participant_one and participant_two):
+        print("1", participant_one, participant_two)
         return False
 
     user_one = User.load_by_uid(participant_one)
     user_two = User.load_by_uid(participant_two)
 
     if not user_one or not user_two:
+        print("2", user_one, user_two)
         return False
 
     participants = [user_one, user_two]
 
     convo = Convo.load_by_participants(participants)
     if not convo:
+        print("3", convo)
         return False
     
     return convo.to_dict()
