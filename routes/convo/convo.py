@@ -93,6 +93,7 @@ def has_valid_participants(participant_one, participant_two):
 
     convo = Convo.load_by_participants(participants)
     if not convo:
+        print("Trying to load by participants: ", participants)
         print("3", convo)
         return False
     
@@ -106,7 +107,7 @@ def get_convo_by_participants(participant_one, participant_two):
     convo = has_valid_participants(participant_one, participant_two)
     if not convo:
         return error_message("Invalid data.", 404)
-    
+    # convo.participants # loading into memory
     return {"message": "OK", "convo": convo}, 200
 
 
