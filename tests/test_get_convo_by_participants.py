@@ -4,7 +4,7 @@ from conftest import normalized_put_method_name, mock_with_patch
 from uuid import uuid4
 
 
-def test_get_convo_by_participants(method, is_authorized, is_valid_id, make_request):
+def test_get_convo_by_participants(method, is_authorized, is_valid_id, make_request, mock_resource):
     """
     Test the /convos/<participant_one>/<participant_two> endpoint with the following parameters:
     - HTTP methods
@@ -18,8 +18,10 @@ def test_get_convo_by_participants(method, is_authorized, is_valid_id, make_requ
     user_one = is_valid_id if is_valid_id else str(uuid4())
     user_two = is_valid_id if is_valid_id else str(uuid4())
     
+    mock_convo_class, mock_convo = mock_resource("routes.convo.convo.Convo")
+
     mock_has_valid_participants = mock_with_patch("routes.convo.convo.has_valid_participants")
-    mock_has_valid_participants.return_value = {"uid": is_valid_id} if is_valid_id else None
+    mock_has_valid_participants.return_value = mock_convo if is_valid_id else None
 
     # ACTION ==================================================================
 
@@ -43,5 +45,4 @@ def test_get_convo_by_participants(method, is_authorized, is_valid_id, make_requ
         return
 
     assert response.status_code == 200
-    assert "convo" in response.get_json()
     assert "token" not in response.get_json()

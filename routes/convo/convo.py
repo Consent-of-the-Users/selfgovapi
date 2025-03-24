@@ -103,9 +103,12 @@ def has_valid_participants(participant_one, participant_two):
 def get_convo_by_participants(participant_one, participant_two):
 
     convo = has_valid_participants(participant_one, participant_two)
+    print(type(convo), 'convo inside load_by_participants')
+
     if not convo:
         return error_message("Invalid data.", 404)
     # convo.participants # loading into memory
+    print(type(convo))
     return {"message": "OK", "uid": convo.uid}, 200
 
 
