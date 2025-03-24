@@ -95,7 +95,7 @@ def has_valid_participants(participant_one, participant_two):
     if not convo:
         return False
     
-    return convo.to_dict()
+    return convo
 
 
 @convos_v1.route('/<participant_one>/<participant_two>', methods=['GET'], strict_slashes=False)
@@ -106,7 +106,7 @@ def get_convo_by_participants(participant_one, participant_two):
     if not convo:
         return error_message("Invalid data.", 404)
     # convo.participants # loading into memory
-    return {"message": "OK", "convo": convo}, 200
+    return {"message": "OK", "uid": convo.uid}, 200
 
 
 """
