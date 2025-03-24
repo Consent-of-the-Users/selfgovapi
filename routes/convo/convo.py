@@ -1,19 +1,29 @@
 from routes.convo import convos_v1
 from authorization import authorize_route, error_message
 from flask import request
+from models.convo import Convo
+from models.user import User
 
 
 def has_valid_data(user_uids):
+    '''
+    Ensure user_uids are valid, there are exactly two of them, and that they do not already have a convo.
+    :param user_uids: Comma-separated string of user UIDs.
+    :return: List of User objects if valid, False otherwise.
+    '''
     import json
-    from models.user import User
-    from models.convo import Convo
+    from os import getenv
 
     if not user_uids:
         return False
 
-    #user_uids = json.loads(user_uids)
-    user_uids = user_uids.split(',')
-    print(user_uids, type(user_uids))
+    PRODUCTION = getenv('PRODUCTION')
+    if not PRODUCTION:
+        user_uids = json.loads(user_uids)
+    else:
+        user_uids = user_uids.split(',')
+
+    print('user uids: ', user_uids, 'type:', type(user_uids))
 
     if len(user_uids) != 2:
         return False
@@ -29,25 +39,19 @@ def has_valid_data(user_uids):
     if Convo.load_by_participants(participants):
         return False
 
-    return user_uids
+    return participants
 
 
-def create_convo(user_uids):
-    from models.convo import Convo
-    from models.user import User
-
+def create_convo(participants):
+    '''
+    Create a new convo with the given participants.
+    :param participants: List of User objects to add to the convo.
+    :return: The created convo as a dictionary.
+    '''
     convo = Convo()
-
     convo.save()
 
-    for uid in user_uids:
-
-        participant = User.load_by_uid(uid)
-
-        if not participant:
-            convo.delete()
-            raise ValueError(f"User with ID {uid} not found.")
-        
+    for participant in participants:        
         convo.add_participant(participant)
 
     convo_dict = convo.to_dict()
@@ -62,12 +66,12 @@ def all_convos():
 
     user_uids = request.form.get('users')
     
-    user_ids = has_valid_data(user_uids)
-    if not user_ids:
+    participants = has_valid_data(user_uids)
+    if not participants:
         return error_message("Invalid data.")
     
     try:
-        convo_dict = create_convo(user_uids=user_ids)
+        convo_dict = create_convo(participants=participants)
     except Exception as e:
         return error_message(f"Error creating convo: {str(e)}")    
     return {"message": "Convo created.", "convo": convo_dict}, 201
@@ -75,26 +79,20 @@ def all_convos():
 
 
 def has_valid_participants(participant_one, participant_two):
-    from models.user import User
-    from models.convo import Convo
-
+    # TODO: Combine this with has_valid_data
     if not (participant_one and participant_two):
-        print("1", participant_one, participant_two)
         return False
 
     user_one = User.load_by_uid(participant_one)
     user_two = User.load_by_uid(participant_two)
 
     if not user_one or not user_two:
-        print("2", user_one, user_two)
         return False
 
     participants = [user_one, user_two]
 
     convo = Convo.load_by_participants(participants)
     if not convo:
-        print("Trying to load by participants: ", participants)
-        print("3", convo)
         return False
     
     return convo.to_dict()
