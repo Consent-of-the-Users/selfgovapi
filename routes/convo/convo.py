@@ -98,18 +98,37 @@ def has_valid_participants(participant_one, participant_two):
     return convo
 
 
-@convos_v1.route('/<participant_one>/<participant_two>', methods=['GET'], strict_slashes=False)
+@convos_v1.route('/<participant_one>/<participant_two>', methods=['GET', 'POST'], strict_slashes=False)
 @authorize_route
 def get_convo_by_participants(participant_one, participant_two):
 
     convo = has_valid_participants(participant_one, participant_two)
-    print(type(convo), 'convo inside load_by_participants')
 
+    if request.method == 'POST':
+        if convo:
+            return {"message": "Convo already exists."}, 409
+
+        participant_one = User.load_by_uid(participant_one)
+        participant_two = User.load_by_uid(participant_two)
+        
+        if not participant_one or not participant_two:
+            return error_message("Invalid participants.")
+        
+        participants = [participant_one, participant_two]
+        try:
+            convo_dict = create_convo(participants=participants)
+        except Exception as e:
+            return error_message(f"Error creating convo: {str(e)}")
+        
+        return {"message": "Convo created.", "convo": convo_dict}, 201
+
+    # convo.participants # loading into memory
     if not convo:
         return error_message("Invalid data.", 404)
-    # convo.participants # loading into memory
-    print(type(convo))
+    
     return {"message": "OK", "uid": convo.uid}, 200
+
+
 
 
 """
