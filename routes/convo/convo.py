@@ -110,7 +110,7 @@ def get_convo_by_participants(participant_one, participant_two):
 
         participant_one = User.load_by_uid(participant_one)
         participant_two = User.load_by_uid(participant_two)
-        
+
         if not participant_one or not participant_two:
             return error_message("Invalid participants.")
         
@@ -119,8 +119,8 @@ def get_convo_by_participants(participant_one, participant_two):
             convo_dict = create_convo(participants=participants)
         except Exception as e:
             return error_message(f"Error creating convo: {str(e)}")
-        
-        return {"message": "Convo created.", "convo": convo_dict}, 201
+        uid = convo_dict.get("uid")
+        return {"message": "Convo created.", "uid": uid}, 201
 
     # convo.participants # loading into memory
     if not convo:
