@@ -31,7 +31,7 @@ def test_get_convo_by_participants(method, is_authorized, is_valid_id, make_requ
 
     # ASSERTIONS ==============================================================
 
-    if method not in ["GET"]:
+    if method not in ["GET", "POST"]:
         assert response.status_code == 405
         return
 
@@ -43,6 +43,14 @@ def test_get_convo_by_participants(method, is_authorized, is_valid_id, make_requ
     if not is_valid_id:
         assert response.status_code == 404
         return
+    
+    if method == "POST":
+        if is_valid_id:
+            assert response.status_code == 201
+            return
+        else:
+            assert response.status_code == 404
+            return
 
     assert response.status_code == 200
-    assert "token" not in response.get_json()
+    assert "token" not in response.get_json
