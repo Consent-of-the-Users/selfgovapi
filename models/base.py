@@ -29,8 +29,10 @@ def save_to_firestore(obj):
     # normalize class names to firestore's standard
     class_name = obj.__class__.__name__.lower()
 
+    table_name = class_name + "s"
+
     # associate class name with the firestore collection
-    doc_ref = firestore.collection(class_name).document(obj.uid)
+    doc_ref = firestore.collection(table_name).document(obj.uid)
     
     # Get the document snapshot to check existence and print its data
     doc_snapshot = doc_ref.get()
@@ -53,8 +55,10 @@ def delete_from_firestore(obj):
     # normalize class names
     class_name = obj.__class__.__name__.lower()
 
+    table_name = class_name + "s"
+
     # delete document by uid
-    firestore.collection(class_name).document(obj.uid).delete()
+    firestore.collection(table_name).document(obj.uid).delete()
 
 # TEST THESE WITH A SCRIPT
 
