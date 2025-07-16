@@ -25,16 +25,19 @@ def test_get_convo_by_participants(
     if is_valid_id and method == "POST":
         mock_convo_class.load_by_participants.return_value = None
     elif is_valid_id and method == "GET":
-        mock_get_convo_uid = mock_with_patch(
-            "routes.convo.convo.get_convo_uid"
-        )
+        mock_get_convo_uid = mock_with_patch("routes.convo.convo.get_convo_uid")
         mock_get_convo_uid.return_value = mock_convo.uid
 
-    print("mock convo class", mock_convo_class, "mock convo", mock_convo, "mock convo return", mock_convo_class.load_by_participants.return_value)
-
-    mock_has_valid_data = mock_with_patch(
-        "routes.convo.convo.has_valid_data"
+    print(
+        "mock convo class",
+        mock_convo_class,
+        "mock convo",
+        mock_convo,
+        "mock convo return",
+        mock_convo_class.load_by_participants.return_value,
     )
+
+    mock_has_valid_data = mock_with_patch("routes.convo.convo.has_valid_data")
     mock_has_valid_data.return_value = mock_convo if is_valid_id else None
 
     print("has valid data mock", mock_has_valid_data)

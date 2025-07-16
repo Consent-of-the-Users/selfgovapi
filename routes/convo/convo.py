@@ -6,22 +6,22 @@ from models.user import User
 
 
 def has_valid_data(user_uids):
-    '''
+    """
     Ensure user_uids are valid, there are exactly two of them, and that they do not already have a convo.
     :param user_uids: Comma-separated string of user UIDs.
     :return: List of User objects if valid, False otherwise.
-    '''
+    """
     import json
     from os import getenv
 
     if not user_uids:
         return False
 
-    PRODUCTION = getenv('PRODUCTION')
+    PRODUCTION = getenv("PRODUCTION")
     if not PRODUCTION:
         user_uids = json.loads(user_uids)
     else:
-        user_uids = user_uids.split(',')
+        user_uids = user_uids.split(",")
 
     if not type(user_uids) == list:
         return False
@@ -30,7 +30,7 @@ def has_valid_data(user_uids):
         return False
 
     participants = []
-    
+
     for uid in user_uids:
         user_exists = User.load_by_uid(uid)
         if not user_exists:
@@ -41,57 +41,61 @@ def has_valid_data(user_uids):
 
 
 def create_convo(participants):
-    '''
+    """
     Create a new convo with the given participants.
     :param participants: List of User objects to add to the convo.
     :return: The created convo as a dictionary.
-    '''
+    """
     convo = Convo()
     convo.save()
 
-    for participant in participants:        
+    for participant in participants:
         convo.add_participant(participant)
 
     convo_dict = convo.to_dict()
     convo.save()
-    
+
     return convo_dict
 
 
-@convos_v1.route('/', methods=['POST'], strict_slashes=False)
+@convos_v1.route("/", methods=["POST"], strict_slashes=False)
 @authorize_route
 def all_convos():
 
-    user_uids = request.form.get('users')
-    
+    user_uids = request.form.get("users")
+
     participants = has_valid_data(user_uids)
     if not participants:
         return error_message("Invalid data.")
-    
+
     try:
         convo_dict = create_convo(participants=participants)
     except Exception as e:
-        return error_message(f"Error creating convo: {str(e)}")    
+        return error_message(f"Error creating convo: {str(e)}")
     return {"message": "Convo created.", "convo": convo_dict}, 201
 
 
-@convos_v1.route('/<participant_one>/<participant_two>', methods=['GET', 'POST'], strict_slashes=False)
+@convos_v1.route(
+    "/<participant_one>/<participant_two>",
+    methods=["GET", "POST"],
+    strict_slashes=False,
+)
 @authorize_route
 def get_convo_by_participants(participant_one, participant_two):
 
     valid_data = has_valid_data(participant_one, participant_two)
     if not valid_data:
         return error_message("Invalid participants.", 404)
-    
+
     convo = Convo.load_by_participants(valid_data)
 
-    if request.method == 'POST':
+    if request.method == "POST":
         if convo:
             return {"message": "Convo already exists."}, 409
 
         participant_one = User.load_by_uid(participant_one)
         participant_two = User.load_by_uid(participant_two)
-        
+
         participants = [participant_one, participant_two]
         try:
             convo_dict = create_convo(participants=participants)
@@ -103,10 +107,11 @@ def get_convo_by_participants(participant_one, participant_two):
     # convo.participants # loading into memory
     if not convo:
         return error_message("Invalid data.", 404)
-    
+
     convo_uid = get_convo_uid(convo)
-    
+
     return {"message": "OK", "uid": convo_uid}, 200
+
 
 def get_convo_uid(convo):
     """
@@ -133,8 +138,8 @@ normalize the way request.args and request.form are used to work both locally an
 """
 
 
-
 # ============
+
 
 def are_valid_participants(user_ids):
     from models.user import User
