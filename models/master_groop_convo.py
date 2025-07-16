@@ -4,9 +4,7 @@ from models.groop_convo import GroopConvo
 class MasterGroopConvo(GroopConvo):
     """The main, always-on conversation for a group, linked to its members."""
 
-    __mapper_args__ = {
-        "polymorphic_identity": "master_groop_convo"
-    }
+    __mapper_args__ = {"polymorphic_identity": "master_groop_convo"}
 
     participants = None
 
@@ -14,7 +12,7 @@ class MasterGroopConvo(GroopConvo):
     def participants(self):
         """Participants are always the group members."""
         return self.groop.members
-    
+
     @property
     def title(self):
         """Ensure the title is always fixed to the group's handle."""

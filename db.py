@@ -48,6 +48,7 @@ def mysql_connection(app):
 
     return db
 
+
 def firebase_connection():
     import firebase_admin
     from firebase_admin import credentials

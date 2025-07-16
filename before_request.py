@@ -28,6 +28,7 @@ def request_attr(attr):
     Get the attribute from the request. For testing purposes.
     """
     from flask import request
+
     in_form = request.form.get(attr)
 
     return in_form if in_form else request.args.get(attr)

@@ -5,8 +5,10 @@ from functools import wraps
 
 unauthorized_message = {"message": "Unauthorized\n"}, 401
 
+
 def error_message(msg, status_code=400):
     return {"message": msg}, status_code
+
 
 def get_authorization_token(request):
     """
@@ -31,7 +33,7 @@ def get_client_from_token(token):
 def authorized_request(request):
     token = get_authorization_token(request)
     return get_client_from_token(token)
-    
+
 
 # wrapper to check for authorization token in request
 def authorize_route(func):

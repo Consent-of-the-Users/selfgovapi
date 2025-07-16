@@ -5,8 +5,10 @@ from uuid import uuid4
 from unittest.mock import MagicMock
 
 
-def test_user_by_id(method, is_valid_id, is_authorized, is_valid_put_data, make_request, mock_resource):
-    
+def test_user_by_id(
+    method, is_valid_id, is_authorized, is_valid_put_data, make_request, mock_resource
+):
+
     # SETUP & MOCK ============================================================
     method = normalized_put_method_name(method)
 
@@ -17,11 +19,16 @@ def test_user_by_id(method, is_valid_id, is_authorized, is_valid_put_data, make_
     request_attr = mock_with_patch("routes.user.user.request_attr")
     request_attr.return_value = False
     if method == "PUT" and is_valid_id and is_authorized and is_valid_put_data:
-        request_attr.return_value = True 
+        request_attr.return_value = True
 
     # ACTION ==================================================================
 
-    response = make_request(method, f"/v1/users/{user_id}/", authorization=is_authorized, data=is_valid_put_data)
+    response = make_request(
+        method,
+        f"/v1/users/{user_id}/",
+        authorization=is_authorized,
+        data=is_valid_put_data,
+    )
 
     # ASSERTIONS ==============================================================
 
@@ -36,14 +43,14 @@ def test_user_by_id(method, is_valid_id, is_authorized, is_valid_put_data, make_
     if not is_valid_id:
         assert response.status_code == 404
         return
-    
+
     if method == "PUT":
         if not is_valid_put_data:
             assert response.status_code == 400
         else:
             assert response.status_code == 204
         return
-    
+
     if method == "DELETE":
         assert response.status_code == 204
         return

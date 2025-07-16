@@ -2,25 +2,26 @@ from models.base import BaseModel, db
 from models.many_to_many import users_convos
 from models.user import User
 
+
 class Convo(BaseModel):
     """Base class for all convos (DMs & Groups)."""
+
     __tablename__ = "convos"
 
     _latest_msg = db.Column(db.String(36), nullable=True)
     _latest_msg_uid = db.Column(db.String(36), nullable=True)
     type = db.Column(db.String(24))
 
-    participants = db.relationship("User", secondary=users_convos, back_populates="convos")
+    participants = db.relationship(
+        "User", secondary=users_convos, back_populates="convos"
+    )
 
-    __mapper_args__ = {
-        "polymorphic_identity": "convo",
-        "polymorphic_on": type
-    }
+    __mapper_args__ = {"polymorphic_identity": "convo", "polymorphic_on": type}
 
     def __init__(self, **kwargs):
         self.latest_msg = None
         self.latest_msg_uid = None
-        self.title = ''
+        self.title = ""
         self.groop_uid = None
         self.groop = None
         super(Convo, self).__init__(**kwargs)
@@ -34,7 +35,7 @@ class Convo(BaseModel):
     def latest_msg(self, msg):
         """Update the latest message and its UID."""
         self._latest_msg = msg
-        #self._latest_msg_uid = msg.uid
+        # self._latest_msg_uid = msg.uid
         self._latest_msg_uid = 0
 
     @classmethod
@@ -54,7 +55,9 @@ class Convo(BaseModel):
             db.session.query(cls)
             .join(cls.participants)
             .group_by(cls.uid)
-            .having(db.func.count(User.uid.distinct()) == len(participants_set))  # Ensures correct number of distinct users
+            .having(
+                db.func.count(User.uid.distinct()) == len(participants_set)
+            )  # Ensures correct number of distinct users
             .all()
         )
 
@@ -65,7 +68,7 @@ class Convo(BaseModel):
                 return convo
 
         return
-    
+
     def add_participant(self, participant):
         """There must be exactly two Convo participants."""
         from models.user import User
@@ -75,8 +78,9 @@ class Convo(BaseModel):
 
         if not isinstance(participant, User):
             raise TypeError("Participant must be a User.")
-    
+
         self.participants.append(participant)
+
 
 '''
     @classmethod

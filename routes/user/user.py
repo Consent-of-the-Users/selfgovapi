@@ -13,10 +13,10 @@ def has_valid_data(name, handle, email, uid):
     handle_taken = User.load_by_attr("handle", handle)
     email_taken = User.load_by_attr("email", email)
     id_taken = User.load_by_uid(uid)
-    
+
     if handle_taken or email_taken or id_taken:
         return False
-    
+
     return True
 
 
@@ -32,19 +32,14 @@ def create_user(**data):
 def all_users():
 
     if request.method == "POST":
-        
+
         name, handle = request_attr("name"), request_attr("handle")
         email, uid = request_attr("email"), request_attr("uid")
 
         if not has_valid_data(name, handle, email, uid):
             return {"message": "Invalid data."}, 404
 
-        data = {
-            "name": name,
-            "handle": handle,
-            "email": email,
-            "uid": uid
-        }
+        data = {"name": name, "handle": handle, "email": email, "uid": uid}
         try:
             user_dict = create_user(**data)
         except Exception as e:
@@ -67,16 +62,16 @@ def users_by_id(uid):
     if request.method == "DELETE":
         user.delete()
         return {"message": "User deleted."}, 204
-    
+
     if request.method == "PUT":
         name = request_attr(request, "name")
         handle = request_attr(request, "handle")
         email = request_attr(request, "email")
-        
+
         handle_taken = User.load_by_attr("handle", handle)
         if handle_taken and not handle_taken.uid == uid:
             return {"message": "user handle taken."}, 400
-        
+
         email_taken = User.load_by_attr("email", email)
         if email_taken and not email_taken.uid == uid:
             return {"message": "user email taken."}, 400
@@ -88,11 +83,11 @@ def users_by_id(uid):
         if email:
             user.email = email
         user.save()
-        
+
         return {"message": "user updated."}, 204
 
     # METHOD IS GET ===========================================================
 
     user_dict = user.to_dict()
-    
+
     return {"message": "OK", "user": user_dict}, 200

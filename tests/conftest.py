@@ -47,6 +47,7 @@ def mock_with_patch(path):
     mock = patcher.start()
     return mock
 
+
 def normalized_put_method_name(method):
     """
     Normalize PUT method names into 'PUT'. This is required because PUT-VALID
@@ -111,7 +112,9 @@ def make_request(api):
 # =============================================================================
 
 
-@pytest.fixture(params=["GET", "POST-VALID", "POST-INVALID", "PUT-VALID", "PUT-INVALID", "DELETE"])
+@pytest.fixture(
+    params=["GET", "POST-VALID", "POST-INVALID", "PUT-VALID", "PUT-INVALID", "DELETE"]
+)
 def method(request):
     """
     Parameterize the methods only, not routes. So GET /obj and GET /obj/{id}
@@ -144,6 +147,7 @@ def is_valid_put_data(request, method):
     """
     return {"data": "valid put data"} if method == "PUT-VALID" else {}
 
+
 @pytest.fixture()
 def is_valid_post_data(request, method):
     """
@@ -166,19 +170,27 @@ def is_valid_id(request):
 @pytest.fixture
 def mock_resource(method, is_valid_id, is_valid_put_data):
     from unittest.mock import MagicMock
+
     # if is_valid_id, return function for mocking a given class & object (values can be overridden)
     # else, return function that mocks class but has it's load methods return None (values can be overridden)
     # this way, no matter if is_valid_id or not, I can call this function with resource being requested and
     # it will mock it correctly based on it's own knowledge of is_valid_id.
-    def get_mock_resource(class_path, valid_id_return=False, valid_attr_return=False, invalid_id_return=False, invalid_attr_return=False, **to_dict_ret):
-        '''
+    def get_mock_resource(
+        class_path,
+        valid_id_return=False,
+        valid_attr_return=False,
+        invalid_id_return=False,
+        invalid_attr_return=False,
+        **to_dict_ret,
+    ):
+        """
         class_path is used to patch in a class.
         An instance of that class will be mocked, given a uid = is_valid_id, and a .to_dict() method.
         The class will have mock .load_by_uid and .load_by_attr methods.
         -----------------------------------------------------------------------
-        '''
+        """
         # MOCK INSTANCE =======================================================
-        
+
         mock_obj = MagicMock()
         mock_obj.uid = is_valid_id
 
@@ -190,21 +202,31 @@ def mock_resource(method, is_valid_id, is_valid_put_data):
 
         mock_class = mock_with_patch(class_path)
 
-        # if is_valid_id load methods return the instance/object, else None.
+        # if is_valid_id, then the load method returns the instance/object, else None.
         # checking if valid/invalid_id_return allows you to override the specific return value if you want to.
+        # in other words, setting valid_id_return to None will make the mock return None
+        # this is useful when creating objects and the desired response is that no similar object already exists.
         if is_valid_id:
-            mock_class.load_by_uid.return_value = valid_id_return if valid_id_return is not False else mock_obj
+            mock_class.load_by_uid.return_value = (
+                valid_id_return if valid_id_return is not False else mock_obj
+            )
         else:
-            mock_class.load_by_uid.return_value = invalid_id_return if invalid_id_return is not False else None
+            mock_class.load_by_uid.return_value = (
+                invalid_id_return if invalid_id_return is not False else None
+            )
 
         if is_valid_put_data and "PUT" in method:
-            mock_class.load_by_attr.return_value = valid_attr_return if valid_attr_return is not False else None
+            mock_class.load_by_attr.return_value = (
+                valid_attr_return if valid_attr_return is not False else None
+            )
         elif not is_valid_put_data and "PUT" in method:
             # put data is invalid if it's taken by another instance of that resource, which would
             # return an instance with a different uid
             mock_obj.uid = str(uuid4())
-            mock_class.load_by_attr.return_value = invalid_attr_return if invalid_attr_return is not False else mock_obj
+            mock_class.load_by_attr.return_value = (
+                invalid_attr_return if invalid_attr_return is not False else mock_obj
+            )
 
         return mock_class, mock_obj
-    
+
     return get_mock_resource

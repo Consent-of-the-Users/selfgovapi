@@ -1,10 +1,10 @@
 from flask import Blueprint
 
-'''
+"""
 users_v1 = Blueprint("users", __name__, url_prefix="/users")
 
 from routes.user.user import all_users, users_by_id
-'''
+"""
 
 reactions_v1 = Blueprint("reactions", __name__, url_prefix="/reactions")
 

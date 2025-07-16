@@ -9,13 +9,13 @@ from models.master_groop_convo import MasterGroopConvo
 
 
 def has_valid_data(name, handle, description):
-    
+
     if not (name and handle and description):
         return False
-    
+
     if Groop.load_by_attr("handle", handle):
         return False
-    
+
     return True
 
 
@@ -27,7 +27,7 @@ def create_groop(**data):
     return groop_dict
 
 
-@groops_v1.route('/', methods=['POST'], strict_slashes=False)
+@groops_v1.route("/", methods=["POST"], strict_slashes=False)
 def all_groops():
 
     name, members = request_attr("name"), request_attr("members")
@@ -37,12 +37,12 @@ def all_groops():
 
         if not has_valid_data(name, handle, description):
             return error_message("Invalid data.", 404)
-        
+
         data = {
             "name": name,
             "handle": handle,
             "description": description,
-            "members": members
+            "members": members,
         }
         try:
             groop_dict = create_groop(**data)

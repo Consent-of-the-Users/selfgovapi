@@ -23,11 +23,12 @@ def has_valid_data(user_uids):
     else:
         user_uids = user_uids.split(',')
 
-    print('user uids: ', user_uids, 'type:', type(user_uids))
+    if not type(user_uids) == list:
+        return False
 
     if len(user_uids) != 2:
         return False
-    
+
     participants = []
     
     for uid in user_uids:
@@ -35,9 +36,6 @@ def has_valid_data(user_uids):
         if not user_exists:
             return False
         participants.append(user_exists)
-
-    if Convo.load_by_participants(participants):
-        return False
 
     return participants
 
@@ -77,32 +75,15 @@ def all_convos():
     return {"message": "Convo created.", "convo": convo_dict}, 201
 
 
-
-def has_valid_participants(participant_one, participant_two):
-    # TODO: Combine this with has_valid_data
-    if not (participant_one and participant_two):
-        return False
-
-    user_one = User.load_by_uid(participant_one)
-    user_two = User.load_by_uid(participant_two)
-
-    if not user_one or not user_two:
-        return False
-
-    participants = [user_one, user_two]
-
-    convo = Convo.load_by_participants(participants)
-    if not convo:
-        return False
-    
-    return convo
-
-
 @convos_v1.route('/<participant_one>/<participant_two>', methods=['GET', 'POST'], strict_slashes=False)
 @authorize_route
 def get_convo_by_participants(participant_one, participant_two):
 
-    convo = has_valid_participants(participant_one, participant_two)
+    valid_data = has_valid_data(participant_one, participant_two)
+    if not valid_data:
+        return error_message("Invalid participants.", 404)
+    
+    convo = Convo.load_by_participants(valid_data)
 
     if request.method == 'POST':
         if convo:
@@ -110,9 +91,6 @@ def get_convo_by_participants(participant_one, participant_two):
 
         participant_one = User.load_by_uid(participant_one)
         participant_two = User.load_by_uid(participant_two)
-
-        if not participant_one or not participant_two:
-            return error_message("Invalid participants.")
         
         participants = [participant_one, participant_two]
         try:
@@ -126,9 +104,15 @@ def get_convo_by_participants(participant_one, participant_two):
     if not convo:
         return error_message("Invalid data.", 404)
     
-    return {"message": "OK", "uid": convo.uid}, 200
+    convo_uid = get_convo_uid(convo)
+    
+    return {"message": "OK", "uid": convo_uid}, 200
 
-
+def get_convo_uid(convo):
+    """
+    Helper function to make mocking easier in tests.
+    """
+    return convo.uid if convo else None
 
 
 """

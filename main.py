@@ -10,7 +10,7 @@ from os import getenv
 load_dotenv()
 
 # env variable determines if running in production
-PRODUCTION = getenv('PRODUCTION')
+PRODUCTION = getenv("PRODUCTION")
 
 # Initialize the flask app
 app = create_app()

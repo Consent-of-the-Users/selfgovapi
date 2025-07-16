@@ -38,7 +38,10 @@ def client_by_id(uid):
 
     name_taken = Client.load_by_attr("name", name)
 
-    if name_taken and ((hasattr(name_taken, "uid") and name_taken.uid != uid) or not hasattr(name_taken, "uid")):
+    if name_taken and (
+        (hasattr(name_taken, "uid") and name_taken.uid != uid)
+        or not hasattr(name_taken, "uid")
+    ):
         return {"message": "Client with this name already exists."}, 400
 
     client.name = name

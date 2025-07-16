@@ -37,7 +37,7 @@ def test_all_convos(method, is_authorized, is_valid_post_data, make_request):
         assert response.status_code == 401
         assert response.get_json() == unauthorized_message[0]
         return
-    
+
     if method == "POST":
         if not is_valid_post_data:
             assert response.status_code == 400

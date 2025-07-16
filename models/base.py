@@ -2,12 +2,13 @@ from db import db, firebase_connection
 
 firestore = firebase_connection()
 
+
 def serialize_obj_lists_for_firestore(obj):
     """
     ORM objects need a Firestore-friendly dictionary with lists of UIDs.
     """
     obj_dict = obj.to_dict()
-    
+
     # ignore private attributes
     for attr_name in dir(obj):
         if attr_name.startswith("_"):
@@ -16,9 +17,15 @@ def serialize_obj_lists_for_firestore(obj):
         attr_value = getattr(obj, attr_name, None)
 
         # if it's a list of objects with UIDs, replace with a list of UIDs
-        if isinstance(attr_value, list) and attr_value and hasattr(attr_value[0], "uid"):
-            obj_dict[attr_name] = [item.uid for item in attr_value]  # Convert to list of UIDs
-    
+        if (
+            isinstance(attr_value, list)
+            and attr_value
+            and hasattr(attr_value[0], "uid")
+        ):
+            obj_dict[attr_name] = [
+                item.uid for item in attr_value
+            ]  # Convert to list of UIDs
+
     return obj_dict
 
 
@@ -33,7 +40,7 @@ def save_to_firestore(obj):
 
     # associate class name with the firestore collection
     doc_ref = firestore.collection(table_name).document(obj.uid)
-    
+
     # Get the document snapshot to check existence and print its data
     doc_snapshot = doc_ref.get()
 
@@ -59,6 +66,7 @@ def delete_from_firestore(obj):
 
     # delete document by uid
     firestore.collection(table_name).document(obj.uid).delete()
+
 
 # TEST THESE WITH A SCRIPT
 
@@ -131,8 +139,8 @@ class BaseModel(db.Model):
         Load all the objects from the database. Optionally remove an attribute from the response.
         """
         return [
-        {k: v for k, v in obj.to_dict().items() if k != remove_attr} 
-        for obj in cls.load_all()
+            {k: v for k, v in obj.to_dict().items() if k != remove_attr}
+            for obj in cls.load_all()
         ]
 
     @classmethod
@@ -153,11 +161,11 @@ class BaseModel(db.Model):
         """
         Serialize the object
         """
-        '''
+        """
         return {
             column.name: getattr(self, column.name) for column in self.__table__.columns
         }'
-        '''
+        """
         return {
             column.name: getattr(self, column.name)
             for column in self.__table__.columns

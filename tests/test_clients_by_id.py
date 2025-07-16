@@ -5,7 +5,9 @@ from uuid import uuid4
 from unittest.mock import MagicMock
 
 
-def test_client_by_id(method, is_valid_id, is_authorized, is_valid_put_data, make_request, mock_resource):
+def test_client_by_id(
+    method, is_valid_id, is_authorized, is_valid_put_data, make_request, mock_resource
+):
     """
     Test the /clients/uid endpoint with the following parameters:
     - HTTP methods
@@ -15,7 +17,7 @@ def test_client_by_id(method, is_valid_id, is_authorized, is_valid_put_data, mak
 
     # SETUP & MOCK ============================================================
     method = normalized_put_method_name(method)
-    
+
     mock_class, mock_obj = mock_resource("routes.client.client.Client")
 
     client_id = is_valid_id if is_valid_id else str(uuid4())
@@ -24,7 +26,7 @@ def test_client_by_id(method, is_valid_id, is_authorized, is_valid_put_data, mak
     request_attr = mock_with_patch("routes.client.client.request_attr")
     request_attr.return_value = False
     if method == "PUT" and is_valid_id and is_authorized and is_valid_put_data:
-        request_attr.return_value = True 
+        request_attr.return_value = True
 
     # ACTION ==================================================================
     response = make_request(
@@ -47,12 +49,12 @@ def test_client_by_id(method, is_valid_id, is_authorized, is_valid_put_data, mak
         assert response.status_code == 401
         # assert response.get_json() == unauthorized_message[0]
         return
-    
+
     if not is_valid_id:
         # method allowed and request authorized but nothing found due to bad uid
         assert response.status_code == 404
         return
-    
+
     # TODO: In the future, ensure only the client being requested can perform the request.
     # is_valid_id == client.uid found via authorization token. This may involve adding another
     # parameter to mock_resource. If token-found client.uid is/isn't = is_valid_id.
