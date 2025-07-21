@@ -5,7 +5,7 @@ from models.convo import Convo
 from models.user import User
 
 
-def has_valid_data(user_uids):
+def has_valid_data(participant_one, participant_two):
     """
     Ensure user_uids are valid, there are exactly two of them, and that they do not already have a convo.
     :param user_uids: Comma-separated string of user UIDs.
@@ -14,9 +14,10 @@ def has_valid_data(user_uids):
     import json
     from os import getenv
 
-    if not user_uids:
+    if not participant_one or not participant_two:
         return False
 
+    '''
     PRODUCTION = getenv("PRODUCTION")
     if not PRODUCTION:
         user_uids = json.loads(user_uids)
@@ -28,16 +29,17 @@ def has_valid_data(user_uids):
 
     if len(user_uids) != 2:
         return False
+    '''
 
     participants = []
 
-    for uid in user_uids:
-        user_exists = User.load_by_uid(uid)
-        if not user_exists:
-            return False
-        participants.append(user_exists)
+    user_one = User.load_by_uid(participant_one)
+    user_two = User.load_by_uid(participant_two)
 
-    return participants
+    if not user_one or not user_two:
+        return False
+
+    return [user_one, user_two]
 
 
 def create_convo(participants):
@@ -83,9 +85,7 @@ def all_convos():
 @authorize_route
 def get_convo_by_participants(participant_one, participant_two):
 
-    user_uids = [participant_one, participant_two]
-
-    valid_data = has_valid_data(user_uids)
+    valid_data = has_valid_data(participant_one, participant_two)
     if not valid_data:
         return error_message("Invalid participants.", 404)
 
