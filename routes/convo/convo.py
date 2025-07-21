@@ -83,7 +83,7 @@ def all_convos():
 @authorize_route
 def get_convo_by_participants(participant_one, participant_two):
 
-    valid_data = has_valid_data(participant_one, participant_two)
+    valid_data = has_valid_data([participant_one, participant_two])
     if not valid_data:
         return error_message("Invalid participants.", 404)
 
